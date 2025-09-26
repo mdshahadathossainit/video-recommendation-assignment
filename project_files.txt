@@ -1,0 +1,196 @@
+ 
+==================== 
+app/main.py 
+==================== 
+from fastapi import FastAPI
+from app.api.v1.routers import feed, youtube, fetch
+from app.database import Base, engine
+
+
+app = FastAPI(title="Video Recommendation Engine")
+
+
+app.include_router(feed.router, prefix="/api/v1")
+app.include_router(youtube.router, prefix="/api/v1")
+app.include_router(fetch.router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Application startup event to create database tables.
+    """
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+ 
+==================== 
+app/database.py 
+==================== 
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from app.config import get_settings
+
+# Load settings from the config file
+settings = get_settings()
+
+# Database URL
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+
+# Asynchronous engine
+engine = create_async_engine(
+    SQLALCHEMY_DATABASE_URL,
+    echo=False  # True করলে SQL queries দেখতে পারবে
+)
+
+# Async session factory
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    expire_on_commit=False,
+    class_=AsyncSession
+)
+
+# Base class for models
+Base = declarative_base()
+
+# Async DB dependency for FastAPI
+async def get_async_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+ 
+==================== 
+app/models.py 
+==================== 
+from sqlalchemy import Column, Integer, String, Text
+from app.database import Base
+
+class Video(Base):
+    """
+    SQLAlchemy model for the 'videos' table in the database.
+    Prevents duplicate table errors by using 'extend_existing=True'.
+    """
+    __tablename__ = "videos"
+    __table_args__ = {"extend_existing": True}  # Avoid duplicate table errors
+
+    id = Column(Integer, primary_key=True, index=True)
+    external_id = Column(String(255), unique=True, index=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(50), nullable=True)
+
+    def __repr__(self):
+        """
+        Provides a helpful representation for debugging.
+        """
+        return f"<Video(id='{self.id}', title='{self.title}')>"
+ 
+==================== 
+app/config.py 
+==================== 
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import AnyUrl
+from typing import Optional
+
+class Settings(BaseSettings):
+    YOUTUBE_API_KEY: str
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    DATABASE_URL: str = "sqlite+aiosqlite:///./dev.db"
+    FLIC_TOKEN: str = ""
+    PAGE_SIZE: int = 20
+    API_BASE_URL: Optional[AnyUrl] = None
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+def get_settings():
+    return Settings()
+ 
+==================== 
+app/db/fetcher.py 
+==================== 
+import os
+import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models import Video
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
+API_KEY = os.getenv("YOUTUBE_API_KEY")
+YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/videos"
+
+async def fetch_and_save_videos(db: AsyncSession):
+    """
+    Fetches most popular videos from YouTube API and saves them to the database.
+    """
+    if not API_KEY:
+        raise ValueError("YouTube API key is not set. Please set YOUTUBE_API_KEY in .env")
+
+    params = {
+        "part": "snippet",
+        "chart": "mostPopular",
+        "maxResults": 10,
+        "regionCode": "US",
+        "key": API_KEY
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(YOUTUBE_API_URL, params=params)
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            return {"error": f"Client error {e.response.status_code} for url {e.request.url}"}
+        except httpx.RequestError as e:
+            return {"error": f"Network error: {str(e)}"}
+
+    data = response.json()
+    videos = data.get("items", [])
+
+    for item in videos:
+        snippet = item["snippet"]
+        video = Video(
+            external_id=item["id"],
+            title=snippet["title"],
+            description=snippet.get("description", ""),
+            category=snippet.get("categoryId")
+        )
+        db.add(video)
+    await db.commit()
+
+    return {"message": f"{len(videos)} videos fetched and saved successfully."}
+ 
+==================== 
+app/api/v1/routers/fetch.py 
+==================== 
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.fetcher import fetch_and_save_videos
+from app.database import get_async_db
+
+router = APIRouter()
+
+@router.get("/fetch-videos")
+async def fetch_videos(db: AsyncSession = Depends(get_async_db)):
+    """
+    API endpoint to manually trigger the fetching and saving of popular YouTube videos.
+    """
+    result = await fetch_and_save_videos(db)
+    return result
+ 
+==================== 
+.env 
+==================== 
+YOUTUBE_API_KEY=AIzaSyBxqNnEfSPTaJxQCshVjdNgyAuYGalf5Hc
+FLIC_TOKEN=
+DATABASE_URL=sqlite+aiosqlite:///./app.db
+REDIS_URL=redis://localhost:6379/0
+PAGE_SIZE=20 

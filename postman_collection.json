@@ -1,0 +1,61 @@
+
+---
+
+## `postman_collection.json`
+```json
+{
+  "info": {
+    "name": "Video Recommendation API",
+    "_postman_id": "12345-abcde-67890-fghij",
+    "description": "Collection for testing the video recommendation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Get Feed",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/feed?username=alice&page=1&page_size=5",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "feed"],
+          "query": [
+            { "key": "username", "value": "alice" },
+            { "key": "page", "value": "1" },
+            { "key": "page_size", "value": "5" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Log Interaction",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"alice\",\n  \"video_id\": 1,\n  \"event_type\": \"like\",\n  \"rating\": null\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/interactions",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "interactions"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" }
+  ]
+}
