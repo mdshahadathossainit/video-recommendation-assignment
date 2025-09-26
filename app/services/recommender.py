@@ -1,11 +1,11 @@
 # app/services/recommender.py
 
 from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession  # ✅ FIX: ডেটাবেস সেশনের জন্য ইমপোর্ট
-from app.api.v1.schemas import VideoOut  # ✅ FIX: আপনার schemas ইমপোর্ট করুন
-from app.db.crud import get_or_create_user  # ✅ FIX: ইউজার CRUD ইমপোর্ট করুন
-from app.db.models import Video  # ✅ FIX: মডেল ইমপোর্ট করুন
-from app.services.recommendation_logic import generate_recommendations  # ✅ FIX: আসল রেকমেন্ডেশন লজিক
+from sqlalchemy.ext.asyncio import AsyncSession 
+from app.api.v1.schemas import VideoOut  
+from app.db.crud import get_or_create_user  
+from app.db.models import Video  
+from app.services.recommendation_logic import generate_recommendations 
 
 
 # Note: configuration (get_settings) is typically passed via dependency injection (Depends)
@@ -43,7 +43,6 @@ async def get_personalized_feed(db: AsyncSession, username: str, page: int, page
             title=v["title"],
             description="",
             category=""
-            # অন্যান্য ফিল্ড...
         )
         for v in paginated_videos
     ]
