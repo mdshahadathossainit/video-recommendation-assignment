@@ -16,8 +16,6 @@ if project_root not in sys.path:
 # ========================
 # Import Base and Settings
 # ========================
-# ❌ DELETE: from app.db.database import Base
-# ✅ FIX: Base এখন app/db/base.py তে আছে, তাই সেখান থেকে ইমপোর্ট করুন।
 from app.db.base import Base
 
 from app.config import get_settings
@@ -28,9 +26,6 @@ load_dotenv()
 
 # Get application settings
 settings = get_settings()
-
-# ✅ FIX: আপনার models ফাইলগুলি লোড করুন যাতে Base.metadata সব টেবিল জানে।
-# এই কাজটি database.py তে করলেও Alembic এর জন্য এখানে নিশ্চিত করা ভালো।
 from app.db import models
 
 
