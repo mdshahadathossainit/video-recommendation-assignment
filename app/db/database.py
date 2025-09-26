@@ -1,12 +1,11 @@
 # app/db/database.py
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-# ❌ DELETE: from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.config import get_settings
 
 
-# Settings লোড করুন
+# Settings
 settings = get_settings()
 
 
