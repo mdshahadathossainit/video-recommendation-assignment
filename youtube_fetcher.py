@@ -3,26 +3,19 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import json
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Get the YouTube API key from environment variables
 api_key = os.getenv("YOUTUBE_API_KEY")
 
 if not api_key:
     raise ValueError("YOUTUBE_API_KEY is not set in the .env file")
 
-# Define the YouTube API service name and version
 api_service_name = "youtube"
 api_version = "v3"
 
 
 def get_youtube_client():
-    """
-    Creates and returns a YouTube API client.
-    Returns:
-        googleapiclient.discovery.Resource: A YouTube API resource object.
-    """
+  
     try:
         youtube_client = build(
             api_service_name,
@@ -36,16 +29,8 @@ def get_youtube_client():
 
 
 def fetch_popular_videos(region_code="US", max_results=10):
-    """
-    Fetches a list of popular videos for a given region.
+   
 
-    Args:
-        region_code (str): The two-letter country code for the region.
-        max_results (int): The maximum number of videos to return.
-
-    Returns:
-        list: A list of dictionaries, where each dictionary contains video data.
-    """
     youtube_client = get_youtube_client()
     if not youtube_client:
         return []
