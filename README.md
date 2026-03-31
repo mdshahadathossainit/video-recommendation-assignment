@@ -1,9 +1,41 @@
 
 # 🚀 Video Recommendation Engine (FastAPI & Content-Based Filtering)
 
-A high-performance, asynchronous video recommendation service designed to provide personalized content using a hybrid filtering approach.
+A high-performance, asynchronous backend service built with FastAPI that provides personalized video recommendations. The system utilizes a hybrid approach, combining Popularity-Based filtering (for new users) and Content-Based filtering (based on user interaction history).
 
 ****
+
+
+# 📸 Project Showcase
+<div align="center">
+<h3>🔍 Interactive API Documentation (Swagger UI)</h3>
+<img src="https://imgur.com/vzxXzxy.png" width="800" alt="Swagger UI">
+<p><i>The system automatically generates interactive documentation for all endpoints.</i></p>
+
+<table style="width:100%">
+<tr>
+<td align="center"><b>📊 Personalized Recommendations</b></td>
+<td align="center"><b>💓 System Health Check</b></td>
+</tr>
+<tr>
+<td><img src="https://imgur.com/2GaWRjA.png" width="400" alt="Recommendations"></td>
+<td><img src="https://imgur.com/EJsaUd6.png" width="400" alt="Health Check"></td>
+</tr>
+<tr>
+<td align="center"><b>🛠️ API Data Schemas</b></td>
+<td align="center"><b>📩 Interaction Models</b></td>
+</tr>
+<tr>
+<td><img src="https://imgur.com/cGCoGd3.png" width="400" alt="Schemas"></td>
+<td><img src="https://imgur.com/zbeSIfi.png" width="400" alt="Interactions"></td>
+</tr>
+</table>
+
+<h3>📐 Data Validation Architecture</h3>
+<img src="https://imgur.com/ZrQVY8A.png" width="800" alt="Validation">
+</div>
+
+
 
 ---
 
@@ -132,11 +164,15 @@ Retrieves the personalized video feed.
 
 -----
 
-## 🧑‍💻 Author and Submission
+
+
+## 🧑‍💻 Author 
 
   * **GitHub Repository:** `https://github.com/mdshahadathossainit/video-recommendation-assignment`
-  * **Author:** `Md Shahadat Hossain
-  * **Submission Date:** 27-sep-2025
+  * **Author:** `Md Shahadat Hossain`
+    * Portfolio: mdshahadathossainit.github.io
+
+  * **Date:** 27-sep-2025
 <!-- end list -->
 
 ```
